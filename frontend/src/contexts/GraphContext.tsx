@@ -89,12 +89,10 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
       const response = await getGraph(currentParentId || undefined);
       if (response.success && response.data) {
         // Remove parentNode properties for nodes in a subgraph view to avoid ReactFlow parent-child errors
-        const processedNodes = currentParentId 
-          ? response.data.nodes.map(node => ({
-              ...node,
-              parentNode: undefined // Remove parentNode property in subgraph view
-            }))
-          : response.data.nodes;
+        const processedNodes = response.data.nodes.map(node => ({
+          ...node,
+          parentNode: undefined // Remove parentNode property in flow view
+        }));
           
         setNodes(processedNodes);
         setEdges(response.data.edges);
@@ -108,7 +106,7 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
       setIsLoading(false);
     }
   }, [currentParentId]);
-
+  
   // Load node types
   const loadNodeTypes = useCallback(async () => {
     try {
@@ -139,7 +137,9 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
   const onNodesChange: OnNodesChange = useCallback(
     async (changes) => {
       // First apply changes to the UI for immediate feedback
-      setNodes((prevNodes) => applyNodeChanges(changes, prevNodes));
+      setNodes((prevNodes) => 
+        applyNodeChanges(changes, prevNodes).filter((node) => node.id !== undefined) as Node<NodeData>[]
+      );
       
       // Then update position in backend for any position changes (not for selection changes)
       const positionChanges = changes.filter(
@@ -282,9 +282,20 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
         const response = await apiUpdateNode(id, updates);
         if (response.success && response.data) {
           setNodes((prevNodes) =>
-            prevNodes.map((node) =>
-              node.id === id ? { ...node, ...response.data } : node
-            )
+            prevNodes.map((node) => {
+              if (node.id === id) {
+                // Create a copy of the response data
+                const updatedNode = { ...response.data };
+                
+                // If we're in a subgraph view, remove the parentNode property to avoid ReactFlow errors
+                if (currentParentId) {
+                  updatedNode.parentNode = undefined;
+                }
+                
+                return updatedNode;
+              }
+              return node;
+            })
           );
           return true;
         }
@@ -294,7 +305,7 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
         return false;
       }
     },
-    []
+    [currentParentId]
   );
 
   // Delete a node

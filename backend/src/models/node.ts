@@ -72,7 +72,7 @@ export interface ReactFlowEdge {
 export const toReactFlowNode = (
     node: Node, 
     nodeType?: NodeType,
-    includeParentNode: boolean = false
+    includeParentNode: boolean = true
 ): ReactFlowNode => {
   return {
     id: node.id,
