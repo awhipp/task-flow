@@ -1,0 +1,30 @@
+{
+  "name": "task-flow",
+  "version": "1.0.0",
+  "description": "A full-stack application for visualizing and managing abstract nodes that represent project management elements, such as initiatives, epics, tasks, and dependencies. The application provides an interactive graph visualization of these nodes and their relationships, allowing users to navigate through the hierarchy easily. It is built using React for the frontend and Fastify for the backend, with SQLite as the database. All of the concepts are user defined, allowing for a flexible and customizable experience based on a project's needs.",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start": "cd backend && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awhipp/task-flow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/awhipp/task-flow/issues"
+  },
+  "homepage": "https://github.com/awhipp/task-flow#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
