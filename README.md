@@ -6,7 +6,7 @@ A full-stack application for visualizing and managing hierarchical task relation
 
 The demonstration showcases the process of creating a project initiative, followed by the addition of multiple epics and tasks. It includes specifying details and assigning tags to these nodes. Furthermore, it illustrates the creation of a custom node type labeled "spike," visualizing their interrelationships, and subsequently reviewing the implementation within a table view to facilitate efficient searching and filtering.
 
-![Demo](https://i.imgur.com/kl3mPWR.gif)
+![Demo](./assets/demo.gif)
 
 ## Features
 
