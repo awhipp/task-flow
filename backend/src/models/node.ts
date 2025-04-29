@@ -69,22 +69,24 @@ export interface ReactFlowEdge {
 }
 
 // Convert from database node to ReactFlow compatible node
-export const toReactFlowNode = (node: Node, nodeType?: NodeType): ReactFlowNode => {
+export const toReactFlowNode = (
+    node: Node, 
+    nodeType?: NodeType,
+    includeParentNode: boolean = false
+): ReactFlowNode => {
   return {
     id: node.id,
-    position: typeof node.position === 'string' ? 
-      JSON.parse(node.position as unknown as string) : node.position,
+    position: typeof node.position === 'string' ? JSON.parse(node.position) : node.position,
     data: {
       label: node.label,
-      nodeType: nodeType?.name || 'Unknown',
+      nodeType: nodeType ? nodeType.name : 'Unknown',
       typeId: node.type_id,
       description: node.description || '',
-      color: nodeType?.color || '#ccc',
-      tags: node.tags || [], // Include tags in the ReactFlow node data
-      ...(node.data && typeof node.data === 'string' ? 
-        JSON.parse(node.data) : (node.data || {}))
+      color: nodeType ? nodeType.color : '#ccc', // Default color if type is not found
+      tags: node.tags && typeof node.tags === 'string' ? JSON.parse(node.tags) : [],
+      ...(node.data && typeof node.data === 'string' ? JSON.parse(node.data) : node.data || {}),
     },
-    ...(node.parent_id ? { parentNode: node.parent_id } : {})
+    ...(includeParentNode && node.parent_id ? { parentNode: node.parent_id } : {}),
   };
 };
 

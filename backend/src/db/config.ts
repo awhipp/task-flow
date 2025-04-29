@@ -4,7 +4,8 @@ import knex from 'knex';
 const db = knex({
   client: 'better-sqlite3',
   connection: {
-    filename: ':memory:' // In-memory SQLite database
+    // filename: ':memory:' // In-memory SQLite database
+    filename: './db.sqlite' // Persistent SQLite database file
   },
   useNullAsDefault: true
 });
