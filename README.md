@@ -40,6 +40,12 @@ The demonstration showcases the process of creating a project initiative, follow
 - **Knex.js** for database queries and schema management
 - **UUID** for generating unique identifiers
 
+## TODO
+
+1. When decomposing a node, it should show the details of the node under the header and above the graph (i.e. name, type, description, tags, and link)
+2. Instead of edit and delete on hover, the top right corner of the node should have a button for delete (and a confirmation dialog for delete) and the left corner should have a button for edit (and a modal for edit).
+3. You should be able to edit or delete a node from the table view as well.
+
 ## Project Structure
 
 ```plaintext

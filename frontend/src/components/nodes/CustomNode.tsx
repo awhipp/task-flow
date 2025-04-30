@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 import { Handle, Position, NodeProps, NodeToolbar } from 'reactflow';
 import { NodeData } from '../../services/api';
 import { useGraph } from '../../contexts/GraphContext';
@@ -38,6 +38,7 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
   const [description, setDescription] = useState(data.description || '');
+  const [link, setLink] = useState(data.link || '');
   
   // Ensure tags are properly initialized from data
   const [tags, setTags] = useState<string[]>(() => {
@@ -74,12 +75,24 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
-  // Handle saving changes to node label, description, and tags
+  // Handle opening the link
+  const handleOpenLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (data.link) {
+      window.open(data.link, '_blank', 'noopener,noreferrer');
+    }
+  };
+  
+  // Handle saving changes to node label, description, tags, and link
   const handleSave = async () => {
     const success = await updateNode(id, { 
       label, 
       description,
       tags,
+      data: { 
+        ...data,
+        link 
+      }
     });
     
     if (success) {
@@ -111,6 +124,22 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
   const nodeTypeTextColor = getContrastColor(nodeTypeColor);
   const tagTextColor = getContrastColor(tagColor);
   
+  // Dynamically set button style properties that depend on node type color
+  const buttonStyle = useMemo(() => {
+    return {
+      backgroundColor: nodeTypeColor,
+      color: nodeTypeTextColor
+    };
+  }, [nodeTypeColor, nodeTypeTextColor]);
+  
+  const linkButtonStyle = useMemo(() => {
+    return {
+      backgroundColor: `rgba(${parseInt(nodeTypeColor.slice(1, 3), 16)},${parseInt(nodeTypeColor.slice(3, 5), 16)},${parseInt(nodeTypeColor.slice(5, 7), 16)},0.15)`,
+      borderColor: nodeTypeColor,
+      color: nodeTypeColor
+    };
+  }, [nodeTypeColor]);
+  
   return (
     <>
       {/* Input handle at the top */}
@@ -126,7 +155,6 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
           {!isEditing ? (
             <>
               <button onClick={() => setIsEditing(true)}>Edit</button>
-              <button onClick={handleOpenSubgraph}>Open Subgraph</button>
               <button onClick={handleDelete}>Delete</button>
             </>
           ) : (
@@ -160,15 +188,6 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               className="node-edit-label"
-              style={{
-                width: '95%',
-                marginBottom: '8px',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontWeight: 'bold',
-                fontSize: '14px'
-              }}
             />
             
             {/* Description edit */}
@@ -177,20 +196,18 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description"
               className="node-edit-description"
-              style={{
-                width: '95%',
-                height: '60px',
-                resize: 'none',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                marginBottom: '8px',
-                fontSize: '12px'
-              }}
+            />
+            
+            {/* Link edit */}
+            <input
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Link URL (optional)"
+              className="node-edit-link"
             />
             
             {/* Tags edit */}
-            <div className="tags-edit-section" style={{ marginBottom: '8px' }}>
+            <div className="tags-edit-section">
               <div style={{ display: 'flex', marginBottom: '4px' }}>
                 <input
                   value={newTag}
@@ -255,39 +272,13 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
         ) : (
           <>
             {/* Node name - Now at the top and highlighted */}
-            <div
-              className="custom-node-title"
-              style={{
-                fontWeight: 'bold',
-                fontSize: '16px',
-                marginBottom: '8px',
-                color: '#2c3e50',
-                borderBottom: '1px solid #eee',
-                paddingBottom: '6px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <div className="custom-node-title">
               {data.label}
             </div>
             
             {/* Description */}
             {data.description && (
-              <div
-                className="custom-node-description"
-                style={{
-                  fontSize: '12px',
-                  color: '#555',
-                  marginBottom: '8px',
-                  maxHeight: '60px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                }}
-              >
+              <div className="custom-node-description">
                 {data.description}
               </div>
             )}
@@ -341,21 +332,26 @@ const CustomNode = ({ id, data, selected }: NodeProps<NodeData>) => {
               </div>
             )}
             
-            {/* Navigation indicator */}
-            <div
-              className="node-subgraph-indicator"
-              onClick={handleOpenSubgraph}
-              style={{
-                textAlign: 'center',
-                fontSize: '11px',
-                color: '#3498db',
-                cursor: 'pointer',
-                padding: '2px 0',
-                borderTop: '1px solid #eee',
-                marginTop: '4px',
-              }}
-            >
-              {data.hasChildren ? 'View Subgraph →' : 'Open →'}
+            {/* Navigation and Link area */}
+            <div className="node-details">
+              {data.link && (
+                <button
+                  onClick={handleOpenLink}
+                  className="node-link-button"
+                  style={linkButtonStyle}
+                >
+                  <span className="icon">🔗</span>
+                  Link
+                </button>
+              )}
+              <button
+                className="node-decompose-button"
+                onClick={handleOpenSubgraph}
+                style={buttonStyle}
+              >
+                Decompose 
+                <span className="arrow">→</span>
+              </button>
             </div>
           </>
         )}

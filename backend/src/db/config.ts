@@ -57,14 +57,27 @@ export const initializeDatabase = async () => {
 
   // Insert some default node types if they don't exist
   const types = await db('node_types').select();
-  if (types.length === 0) {
-    await db('node_types').insert([
-      { id: 'initiative', name: 'Initiative', color: '#3F51B5' }, // Indigo
-      { id: 'epic', name: 'Epic', color: '#673AB7' }, // Deep Purple
-      { id: 'task', name: 'Task', color: '#2196F3' }, // Blue
-      { id: 'subtask', name: 'Sub Task', color: '#00BCD4' } // Cyan
-    ]);
-  }
+  // Check each type to see if it exists
+    const typeIds = ['initiative', 'epic', 'task', 'subtask', 'design spec', 'proposal'];
+    const existingTypes = await db('node_types').whereIn('id', typeIds).select('id');
+    const existingTypeIds = existingTypes.map(type => type.id);
+    const missingTypes = typeIds.filter(typeId => !existingTypeIds.includes(typeId));
+
+    // If any types are missing, insert them
+    if (missingTypes.length > 0) {
+      const defaultTypes = [
+        { id: 'initiative', name: 'Initiative', color: '#3F51B5' }, // Indigo
+        { id: 'epic', name: 'Epic', color: '#673AB7' }, // Deep Purple
+        { id: 'task', name: 'Task', color: '#2196F3' }, // Blue
+        { id: 'subtask', name: 'Sub Task', color: '#00BCD4' }, // Cyan
+        { id: 'design spec', name: 'Design Spec', color: '#009688' }, // Teal
+        { id: 'proposal', name: 'Proposal', color: '#4CAF50' }, // Green
+      ].filter(type => missingTypes.includes(type.id));
+
+      // Insert the missing types into the node_types table
+
+      await db('node_types').insert(defaultTypes);
+    }
 };
 
 export default db;

@@ -43,7 +43,7 @@ interface GraphContextProps {
   onConnect: OnConnect;
   navigateToSubgraph: (parentId: string, parentLabel: string) => void;
   navigateUp: () => void;
-  addNode: (type: string, label: string, position: { x: number; y: number }, description?: string) => Promise<Node<NodeData> | null>;
+  addNode: (type: string, label: string, position: { x: number; y: number }, description?: string, tags?: string[], data?: Record<string, any>) => Promise<Node<NodeData> | null>;
   updateNode: (id: string, updates: Partial<NodeCreatePayload>) => Promise<boolean>;
   deleteNode: (id: string) => Promise<boolean>;
   createNodeLink: (sourceId: string, targetId: string, label?: string) => Promise<Edge | null>;
@@ -231,7 +231,7 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
 
   // Add a new node
   const addNode = useCallback(
-    async (type: string, label: string, position: { x: number; y: number }, description?: string, tags?: string[]): Promise<Node<NodeData> | null> => {
+    async (type: string, label: string, position: { x: number; y: number }, description?: string, tags?: string[], data?: Record<string, any>): Promise<Node<NodeData> | null> => {
       try {
         console.log(`Adding node with parent_id: ${currentParentId}`);
         
@@ -242,7 +242,8 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
           description,
           position,
           parent_id: currentParentId,
-          tags // Include tags in node creation
+          tags, // Include tags in node creation
+          data  // Include additional data (like link URL) in node creation
         });
 
         if (response.success && response.data) {

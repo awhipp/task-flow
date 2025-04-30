@@ -52,6 +52,7 @@ function App() {
 
   const [nodeName, setNodeName] = useState('');
   const [nodeDescription, setNodeDescription] = useState('');
+  const [nodeLink, setNodeLink] = useState('');
   const [selectedNodeType, setSelectedNodeType] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
@@ -83,20 +84,24 @@ function App() {
     const centerY = (window.innerHeight / 2 - y) / zoom;
 
     // Add the new node
+    const nodeData = nodeLink ? { link: nodeLink } : undefined;
+    
     await addNode(
       selectedNodeType,
       nodeName,
       { x: centerX, y: centerY },
       nodeDescription,
-      tags.length > 0 ? tags : undefined
+      tags.length > 0 ? tags : undefined,
+      nodeData
     );
 
     // Reset form
     setNodeName('');
     setNodeDescription('');
+    setNodeLink('');
     setTags([]);
     setShowAddNodeForm(false);
-  }, [nodeName, nodeDescription, selectedNodeType, tags, addNode, reactFlowInstance]);
+  }, [nodeName, nodeDescription, nodeLink, selectedNodeType, tags, addNode, reactFlowInstance]);
 
   // Function to handle node click in table view
   const handleNodeClick = useCallback((nodeId: string, label: string) => {
@@ -107,6 +112,16 @@ function App() {
   const toggleViewMode = useCallback(() => {
     setViewMode(prev => prev === ViewMode.GRAPH ? ViewMode.TABLE : ViewMode.GRAPH);
   }, []);
+
+  // Reset form fields
+  const resetForm = () => {
+    setNodeName('');
+    setNodeDescription('');
+    setNodeLink('');
+    setSelectedNodeType('');
+    setTags([]);
+    setShowAddNodeForm(false);
+  };
 
   return (
     <div className="app-container">
@@ -209,6 +224,13 @@ function App() {
                       onChange={(e) => setNodeDescription(e.target.value)}
                     />
                     
+                    <input
+                      type="text"
+                      placeholder="Link URL (optional)"
+                      value={nodeLink}
+                      onChange={(e) => setNodeLink(e.target.value)}
+                    />
+                    
                     {/* Tags section */}
                     <div className="tags-section">
                       <div className="tag-input-container">
@@ -245,12 +267,7 @@ function App() {
                     
                     <div className="form-actions">
                       <button onClick={handleAddNode}>Add</button>
-                      <button onClick={() => {
-                        setShowAddNodeForm(false);
-                        setNodeName('');
-                        setNodeDescription('');
-                        setTags([]);
-                      }}>Cancel</button>
+                      <button onClick={resetForm}>Cancel</button>
                     </div>
                   </div>
                 )}
@@ -300,12 +317,7 @@ function App() {
                   <div className="add-node-modal">
                     <div className="modal-header">
                       <h2>Add New Node</h2>
-                      <button className="close-button" onClick={() => {
-                        setShowAddNodeForm(false);
-                        setNodeName('');
-                        setNodeDescription('');
-                        setTags([]);
-                      }}>×</button>
+                      <button className="close-button" onClick={resetForm}>×</button>
                     </div>
                     <div className="add-node-form">
                       <select
@@ -331,6 +343,13 @@ function App() {
                         placeholder="Description (optional)"
                         value={nodeDescription}
                         onChange={(e) => setNodeDescription(e.target.value)}
+                      />
+                      
+                      <input
+                        type="text"
+                        placeholder="Link URL (optional)"
+                        value={nodeLink}
+                        onChange={(e) => setNodeLink(e.target.value)}
                       />
                       
                       {/* Tags section */}
@@ -369,12 +388,7 @@ function App() {
                       
                       <div className="form-actions">
                         <button onClick={handleAddNode}>Add</button>
-                        <button onClick={() => {
-                          setShowAddNodeForm(false);
-                          setNodeName('');
-                          setNodeDescription('');
-                          setTags([]);
-                        }}>Cancel</button>
+                        <button onClick={resetForm}>Cancel</button>
                       </div>
                     </div>
                   </div>
